@@ -2,7 +2,13 @@ var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcrypt');
 var saltRounds = 10;
-const {objectId} = require('mongodb');
+const { ObjectId } = require('mongodb');
+
+var ResponseType = {
+  INVALID_USERNAME: 0,
+  INVALID_PASSWORD: 1,
+  SUCCESS: 2,
+}
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -10,15 +16,15 @@ router.get('/', function(req, res, next) {
 });
 
 // 회원가입
-router.post('/signup', async function(req, res, next){
-  try{
+router.post('/signup', async function(req, res, next) {
+  try {
     var username = req.body.username;
     var password = req.body.password;
     var nickname = req.body.nickname;
 
     // 입력값 검증
-    if (!username || !password || !nickname){
-      return res.status(400).json({message: 'All fields are required.'});
+    if (!username || !password || !nickname) {
+      return res.status(400).json({ message: 'All fields are required.' });
     }
 
     // DB 연결
@@ -26,9 +32,9 @@ router.post('/signup', async function(req, res, next){
     var users = database.collection('users');
 
     // 중복된 username 확인
-    var existingUser = await users.findOne({username: username});
-    if (existingUser){
-      return res.status(409).json({message: 'Username already exists.'});
+    var existingUser = await users.findOne({ username: username });
+    if (existingUser) {
+      return res.status(409).json({ message: 'Username already exists.' });
     }
 
     // 비밀번호 암호화
@@ -43,10 +49,10 @@ router.post('/signup', async function(req, res, next){
       createdAt: new Date()
     });
 
-    res.status(201).json({message: 'User registered successfully.'});
+    res.status(201).json({ message: 'User registered successfully.' });
   } catch (error) {
     console.error('Error during signup:', error);
-    res.status(500).json({message: 'Internal server error.'});
+    res.status(500).json({ message: 'Internal server error.' });
   }
 });
 
@@ -75,12 +81,12 @@ router.post('/signin', async function(req, res, next) {
         req.session.userId = existingUser._id.toString();
         req.session.username = existingUser.username;
         req.session.nickname = existingUser.nickname;
-        res.json({ message: 'Login successful.' });
+        res.json({ result: ResponseType.SUCCESS });
       } else {
-        res.status(401).json({ message: 'Invalid password.' });
+        res.status(401).json({ result: ResponseType.INVALID_PASSWORD });
       }
     } else {
-      res.status(401).json({ message: 'User not found.' });
+      res.status(401).json({ result: ResponseType.INVALID_USERNAME });
     }
   } catch (error) {
     console.error('Error during signin:', error);

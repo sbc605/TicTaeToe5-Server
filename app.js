@@ -21,16 +21,16 @@ var app = express();
 app.use(session({
   secret: process.env.SESSION_SECRET || 'session-login',
   resave: false,
-  saveUninitialized: false, // 세션이 필요할 때만 저장하도록 설정
+  saveUninitialized: false,  // 세션이 필요할 때만 저장하도록 설정
   store: new fileStore({
     path: './sessions', // 세션 파일 저장 경로 지정
-    ttl: 24 * 60 * 60, // 세션 유효 기간(1일)
-    reapInterval: 60 * 60 // 세션 정리 주기(1시간)
+    ttl: 24 * 60 * 60, // 세션 유효 기간 (1일)
+    reapInterval: 60 * 60 // 세션 정리 주기 (1시간)
   }),
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 쿠키 전송
-    maxAge: 24 * 60 * 60 * 1000 // 쿠키 유효 기간(1일)
+    maxAge: 24 * 60 * 60 * 1000 // 쿠키 유효 기간 (1일)
   }
 }));
 
